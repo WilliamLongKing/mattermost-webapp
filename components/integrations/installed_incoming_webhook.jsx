@@ -44,6 +44,8 @@ export default class InstalledIncomingWebhook extends React.PureComponent {
         */
         onDelete: PropTypes.func.isRequired,
 
+        onToggle: PropTypes.func.isRequired,
+
         /**
         * String used for filtering webhook item
         */
@@ -74,11 +76,24 @@ export default class InstalledIncomingWebhook extends React.PureComponent {
         this.props.onDelete(this.props.incomingWebhook);
     }
 
+    toggleEnabled = () => {
+        const incomingWebhook = this.props.incomingWebhook;
+        const toggledWebhook = {
+            channel_id: incomingWebhook.channelId,
+            channel_locked: incomingWebhook.channelLocked,
+            enabled: !incomingWebhook.enabled,
+            display_name: incomingWebhook.displayName,
+            description: incomingWebhook.description,
+            username: incomingWebhook.username,
+            icon_url: incomingWebhook.iconURL,
+        };
+        this.props.onToggle(toggledWebhook).then(() => this.setState({enabled: toggledWebhook.enabled}));
+    }
+
     render() {
         const incomingWebhook = this.props.incomingWebhook;
         const channel = this.props.channel;
         const filter = this.props.filter ? this.props.filter.toLowerCase() : '';
-
         if (!matchesFilter(incomingWebhook, channel, filter)) {
             return null;
         }
@@ -97,6 +112,13 @@ export default class InstalledIncomingWebhook extends React.PureComponent {
             );
         }
 
+        let displayEnabled;
+        if (incomingWebhook.enabled) {
+            displayEnabled = " - Enabled";
+        } else {
+            displayEnabled = " - Disabled";
+        }
+
         let description = null;
         if (incomingWebhook.description) {
             description = (
@@ -112,6 +134,14 @@ export default class InstalledIncomingWebhook extends React.PureComponent {
         if (this.props.canChange) {
             actions = (
                 <div className='item-actions'>
+                    <button
+                        id='enableIncomingWebhook'
+                        type='button'
+                        className='btn btn-primary'
+                        onClick={this.toggleEnabled}
+                    >
+                    </button>
+                    {'  '}
                     <Link to={`/${this.props.team.name}/integrations/incoming_webhooks/edit?id=${incomingWebhook.id}`}>
                         <FormattedMessage
                             id='installed_integrations.edit'
@@ -139,7 +169,7 @@ export default class InstalledIncomingWebhook extends React.PureComponent {
                 <div className='item-details'>
                     <div className='item-details__row d-flex flex-column flex-md-row justify-content-between'>
                         <strong className='item-details__name'>
-                            {displayName}
+                            {displayName}{displayEnabled}
                         </strong>
                         {actions}
                     </div>

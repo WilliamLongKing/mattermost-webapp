@@ -73,6 +73,7 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
             description: hook.description || '',
             channelId: hook.channel_id || '',
             channelLocked: hook.channel_locked || false,
+            enabled: hook.enabled || false,
             username: hook.username || '',
             iconURL: hook.icon_url || '',
             saving: false,
@@ -111,6 +112,7 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
         const hook = {
             channel_id: this.state.channelId,
             channel_locked: this.state.channelLocked,
+            enabled: this.state.enabled,
             display_name: this.state.displayName,
             description: this.state.description,
             username: this.state.username,
@@ -144,6 +146,12 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
         });
     }
 
+    updateEnabled = (e) => {
+        this.setState({
+            enabled: e.target.checked,
+        })
+    }
+
     updateUsername = (e) => {
         this.setState({
             username: e.target.value,
@@ -154,6 +162,12 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
         this.setState({
             iconURL: e.target.value,
         });
+    }
+
+    toggleEnabled = (b) => {
+        this.setState({
+            enabled: b
+        })
     }
 
     render() {
@@ -266,7 +280,7 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
                             >
                                 <FormattedMessage
                                     id='add_incoming_webhook.channelLocked'
-                                    defaultMessage='Lock to this channel'
+                                    defaultMessage='Lock to this channel!'
                                 />
                             </label>
                             <div className='col-md-5 col-sm-8 checkbox'>
@@ -280,6 +294,31 @@ export default class AbstractIncomingWebhook extends React.PureComponent {
                                     <FormattedMessage
                                         id='add_incoming_webhook.channelLocked.help'
                                         defaultMessage='If set, the incoming webhook can post only to the selected channel.'
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className='form-group'>
+                            <label
+                                className='control-label col-sm-4'
+                                htmlFor='enabled'
+                            >
+                                <FormattedMessage
+                                    id='add_incoming_webhook.enabled'
+                                    defaultMessage='Enable webhook'
+                                />
+                            </label>
+                            <div className='col-md-5 col-sm-8 checkbox'>
+                                <input
+                                    id='enabled'
+                                    type='checkbox'
+                                    checked={this.state.enabled}
+                                    onChange={this.updateEnabled}
+                                />
+                                <div className='form__help'>
+                                    <FormattedMessage
+                                        id='add_incoming_webhook.enabled.help'
+                                        defaultMessage='If set, the incoming webhook will be enabled. If unset, it will be disabled!'
                                     />
                                 </div>
                             </div>

@@ -4,7 +4,7 @@
 import {connect} from 'react-redux';
 import {ActionCreatorsMapObject, bindActionCreators, Dispatch} from 'redux';
 
-import {removeIncomingHook} from 'mattermost-redux/actions/integrations';
+import {removeIncomingHook, updateIncomingHook} from 'mattermost-redux/actions/integrations';
 
 import {getAllChannels} from 'mattermost-redux/selectors/entities/channels';
 import {getIncomingHooks} from 'mattermost-redux/selectors/entities/integrations';
@@ -15,6 +15,7 @@ import {haveITeamPermission} from 'mattermost-redux/selectors/entities/roles';
 import {Permissions} from 'mattermost-redux/constants';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {ActionResult, GenericAction} from 'mattermost-redux/types/actions';
+import {IncomingWebhook} from '@mattermost/types/integrations';
 
 import {loadIncomingHooksAndProfilesForTeam} from 'actions/integration_actions.jsx';
 
@@ -22,6 +23,7 @@ import InstalledIncomingWebhooks from './installed_incoming_webhooks';
 
 type Actions = {
     removeIncomingHook: (hookId: string) => Promise<ActionResult>;
+    updateIncomingHook: (incomingWebhook: IncomingWebhook) => Promise<ActionResult>
     loadIncomingHooksAndProfilesForTeam: (teamId: string, startPageNumber: number, pageSize: string) => Promise<ActionResult>;
 }
 
@@ -49,6 +51,7 @@ function mapDispatchToProps(dispatch: Dispatch<GenericAction>) {
         actions: bindActionCreators<ActionCreatorsMapObject<any>, Actions>({
             loadIncomingHooksAndProfilesForTeam,
             removeIncomingHook,
+            updateIncomingHook,
         }, dispatch),
     };
 }
