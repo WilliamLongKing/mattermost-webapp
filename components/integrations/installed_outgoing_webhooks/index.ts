@@ -43,6 +43,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
         actions: bindActionCreators<ActionCreatorsMapObject<any>, Props['actions']>({
             loadOutgoingHooksAndProfilesForTeam,
             removeOutgoingHook: Actions.removeOutgoingHook,
+            updateOutgoingHook: Actions.updateOutgoingHook,
             regenOutgoingHookToken: Actions.regenOutgoingHookToken,
         }, dispatch),
     };
