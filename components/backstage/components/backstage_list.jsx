@@ -41,9 +41,6 @@ export default class BackstageList extends React.PureComponent {
 
         this.state = {
             filter: '',
-            initPage: props.page,
-            startCount: this.props.initPage ? (this.props.initPage * PAGE_SIZE) + 1 : 1,
-            endCount: this.props.initPage ? (this.props.initPage + 1) * PAGE_SIZE : PAGE_SIZE,
         };
     }
 
@@ -51,6 +48,15 @@ export default class BackstageList extends React.PureComponent {
         this.setState({
             filter: e.target.value,
         });
+    }
+
+    getPaginationProps(total) {
+        const page = this.props.page;
+        const startCount = (page * PAGE_SIZE) + 1;
+        let endCount = 0;
+        endCount = (page + 1) * PAGE_SIZE;
+        endCount = endCount > total ? total : endCount;
+        return {startCount, endCount};
     }
 
     nextPage = () => {
@@ -72,11 +78,9 @@ export default class BackstageList extends React.PureComponent {
         }
         let footer = null;
         if (total) {
-            const start = this.state.startCount;
-            let end = this.state.endCount;
-            end = end > total ? total : end; 
-            const firstPage = this.state.startCount <= 1;
-            const lastPage = end >= total;
+            const {startCount, endCount} = this.getPaginationProps(total)
+            const firstPage = startCount <= 1;
+            const lastPage = endCount >= total;
 
             let prevPageFn = this.previousPage;
             if (firstPage) {
@@ -92,10 +96,10 @@ export default class BackstageList extends React.PureComponent {
                 <div className='backstage-list__paging'>
                     <FormattedMessage
                         id='backstage-list.paginatorCount'
-                        defaultMessage='{start, number} - {end, number} of {total, number}'
+                        defaultMessage='{startCount, number} - {endCount, number} of {total, number}'
                         values={{
-                            start,
-                            end,
+                            startCount,
+                            endCount,
                             total,
                         }}
                     />
@@ -138,8 +142,8 @@ export default class BackstageList extends React.PureComponent {
                 return React.cloneElement(child, {filter});
             });
             total = children.length;
-            const endCount = this.state.endCount > total ? total : this.state.endCount; 
-            children = children.slice(this.state.startCount - 1, endCount);
+            const {startCount, endCount} = this.getPaginationProps(total); 
+            children = children.slice(startCount - 1, endCount);
             if (children.length === 0 || !hasChildren) {
                 if (!filter) {
                     if (this.props.emptyText) {
