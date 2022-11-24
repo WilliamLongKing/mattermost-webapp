@@ -213,6 +213,10 @@
         border: none;
     }
 
+    .item-actions {
+        height: auto;
+    }
+
     .item-details {
         overflow: hidden;
         flex-grow: 1;
@@ -317,6 +321,23 @@
             padding: 0;
             text-align: left;
         }
+    }
+}
+
+.backstage-footer {
+    display: flex;
+    height: auto;
+    flex-direction: row;
+    padding: 5px 0;
+    border-top: solid 1px rgba(0, 0, 0, 0.1);
+    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+    background: $white;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 1.1em;
+    text-align: right;
+    .backstage-list__paging {
+        width: 100%;
+        text-align: right;
     }
 }
 
