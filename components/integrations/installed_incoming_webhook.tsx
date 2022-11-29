@@ -8,6 +8,7 @@ import {Link} from 'react-router-dom';
 import {getSiteURL} from 'utils/url';
 
 import CopyText from 'components/copy_text';
+import Toggle from 'components/toggle';
 
 import {IncomingWebhook} from '@mattermost/types/integrations';
 import {Team} from '@mattermost/types/teams';
@@ -47,6 +48,11 @@ type Props = {
     onDelete: (incomingWebhook: IncomingWebhook) => void;
 
     /**
+    * Function to enable or disable webhook when toggle button is pressed
+    */
+    onToggle: (incomingWebhook: IncomingWebhook) => void;
+
+    /**
      * String used for filtering webhook item
      */
     filter?: string;
@@ -74,9 +80,37 @@ type Props = {
     channel: Channel;
 }
 
-export default class InstalledIncomingWebhook extends React.PureComponent<Props> {
+type State = {
+    hovering: boolean;
+}
+
+export default class InstalledIncomingWebhook extends React.PureComponent<Props, State> {
+    public constructor(props: Props) {
+        super(props);
+        this.state = {
+            hovering: false,
+        };
+    }
+
     handleDelete = () => {
         this.props.onDelete(this.props.incomingWebhook);
+    }
+
+    handleToggle = () => {
+        const incomingWebhook = this.props.incomingWebhook;
+        const toggledWebhook = {
+            ...incomingWebhook,
+            enabled: !incomingWebhook.enabled,
+        };
+        this.props.onToggle(toggledWebhook);
+    }
+
+    handleMouseOver = () => {
+        this.setState({hovering: true});
+    }
+
+    handleMouseOut = () =>{
+        this.setState({hovering: false});
     }
 
     render() {
@@ -102,6 +136,16 @@ export default class InstalledIncomingWebhook extends React.PureComponent<Props>
             );
         }
 
+        let displayEnabled = null;
+        if (!incomingWebhook.enabled) {
+            displayEnabled = (
+                <FormattedMessage
+                    id='installed_incoming_webhooks.disabled_webhook'
+                    defaultMessage=' (Disabled)'
+                />
+            );
+        }
+
         let description = null;
         if (incomingWebhook.description) {
             description = (
@@ -115,15 +159,16 @@ export default class InstalledIncomingWebhook extends React.PureComponent<Props>
 
         let actions = null;
         if (this.props.canChange) {
-            actions = (
+            actions = (this.state.hovering ? 
                 <div className='item-actions'>
+                    <Toggle
+                        disabled={false}
+                        onToggle={this.handleToggle}
+                        toggled={this.props.incomingWebhook.enabled}
+                    />
                     <Link to={`/${this.props.team.name}/integrations/incoming_webhooks/edit?id=${incomingWebhook.id}`}>
-                        <FormattedMessage
-                            id='installed_integrations.edit'
-                            defaultMessage='Edit'
-                        />
+                        <i className='icon icon-pencil-outline'/>
                     </Link>
-                    {' - '}
                     <DeleteIntegrationLink
                         modalMessage={
                             <FormattedMessage
@@ -134,17 +179,26 @@ export default class InstalledIncomingWebhook extends React.PureComponent<Props>
                         onDelete={this.handleDelete}
                     />
                 </div>
+            :
+                <div className='item-actions'>
+                    <Toggle
+                        disabled={false}
+                        onToggle={this.handleToggle}
+                        toggled={this.props.incomingWebhook.enabled}
+                    />
+                </div>
             );
         }
 
         const incomingWebhookId = getSiteURL() + '/hooks/' + incomingWebhook.id;
 
         return (
-            <div className='backstage-list__item'>
+            <div className='backstage-list__item' onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut}>
                 <div className='item-details'>
                     <div className='item-details__row d-flex flex-column flex-md-row justify-content-between'>
                         <strong className='item-details__name'>
                             {displayName}
+                            {displayEnabled}
                         </strong>
                         {actions}
                     </div>
