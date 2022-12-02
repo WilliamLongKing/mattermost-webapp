@@ -249,6 +249,20 @@
     .item-details__trigger-words {
         white-space: nowrap;
     }
+
+    .item-actions {
+        button {
+            height: 20px;
+            margin-left: 10px;
+            .handle {
+                height: 14.28px;
+                width: 14.28px;
+            }
+        }
+        .btn {
+            margin-left: 15px;
+        }
+    }
 }
 
 // Backstage Form

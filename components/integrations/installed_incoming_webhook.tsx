@@ -165,6 +165,7 @@ export default class InstalledIncomingWebhook extends React.PureComponent<Props,
                         disabled={false}
                         onToggle={this.handleToggle}
                         toggled={this.props.incomingWebhook.enabled}
+                        size={'btn-sm'}
                     />
                     <Link to={`/${this.props.team.name}/integrations/incoming_webhooks/edit?id=${incomingWebhook.id}`}>
                         <i className='icon icon-pencil-outline'/>
@@ -185,6 +186,7 @@ export default class InstalledIncomingWebhook extends React.PureComponent<Props,
                         disabled={false}
                         onToggle={this.handleToggle}
                         toggled={this.props.incomingWebhook.enabled}
+                        size={'btn-sm'}
                     />
                 </div>
             );
