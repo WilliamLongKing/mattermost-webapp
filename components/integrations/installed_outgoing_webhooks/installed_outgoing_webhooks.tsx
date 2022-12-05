@@ -5,7 +5,6 @@ import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
 import {localizeMessage} from 'utils/utils';
-import Constants from 'utils/constants';
 
 import BackstageList from 'components/backstage/components/backstage_list';
 import InstalledOutgoingWebhook, {matchesFilter} from 'components/integrations/installed_outgoing_webhook';
@@ -62,9 +61,14 @@ export type Props = {
         removeOutgoingHook: (hookId: string) => Promise<void>;
 
         /**
+         * The function to call for updating outgoingWebhook
+         */
+        updateOutgoingHook: (hook: OutgoingWebhook) => Promise<void>;
+
+        /**
         * The function to call for outgoingWebhook List and for the status of api
         */
-        loadOutgoingHooksAndProfilesForTeam: (teamId: string, page: number, perPage: number) => Promise<void>;
+                loadAllOutgoingHooksAndProfilesForTeam: (teamId: string) => Promise<void>;
 
         /**
         * The function to call for regeneration of webhook token
@@ -80,6 +84,7 @@ export type Props = {
 
 type State = {
     loading: boolean;
+    page: number;
 };
 
 export default class InstalledOutgoingWebhooks extends React.PureComponent<Props, State> {
@@ -88,15 +93,14 @@ export default class InstalledOutgoingWebhooks extends React.PureComponent<Props
 
         this.state = {
             loading: true,
+            page: 0,
         };
     }
 
     componentDidMount() {
         if (this.props.enableOutgoingWebhooks) {
-            this.props.actions.loadOutgoingHooksAndProfilesForTeam(
-                this.props.teamId,
-                Constants.Integrations.START_PAGE_NUM,
-                parseInt(Constants.Integrations.PAGE_SIZE, 10),
+            this.props.actions.loadAllOutgoingHooksAndProfilesForTeam(
+                this.props.teamId
             ).then(
                 () => this.setState({loading: false}),
             );
@@ -109,6 +113,10 @@ export default class InstalledOutgoingWebhooks extends React.PureComponent<Props
 
     removeOutgoingHook = (outgoingWebhook: OutgoingWebhook) => {
         this.props.actions.removeOutgoingHook(outgoingWebhook.id);
+    }
+
+    toggleOutgoingHook = (outgoingWebhook: OutgoingWebhook) => {
+        this.props.actions.updateOutgoingHook(outgoingWebhook);
     }
 
     outgoingWebhookCompare = (a: OutgoingWebhook, b: OutgoingWebhook) => {
@@ -134,6 +142,14 @@ export default class InstalledOutgoingWebhooks extends React.PureComponent<Props
         return displayNameA.localeCompare(displayNameB);
     }
 
+    nextPage = () => {
+        this.setState({page: this.state.page + 1});
+    }
+
+    previousPage = () => {
+        this.setState({page: this.state.page - 1});
+    }
+
     outgoingWebhooks = (filter: string) => this.props.outgoingWebhooks.
         sort(this.outgoingWebhookCompare).
         filter((outgoingWebhook) => matchesFilter(outgoingWebhook, this.props.channels[outgoingWebhook.channel_id], filter)).
@@ -146,6 +162,7 @@ export default class InstalledOutgoingWebhooks extends React.PureComponent<Props
                     outgoingWebhook={outgoingWebhook}
                     onRegenToken={this.regenOutgoingWebhookToken}
                     onDelete={this.removeOutgoingHook}
+                    onToggle={this.toggleOutgoingHook}
                     creator={this.props.users[outgoingWebhook.creator_id] || {}}
                     canChange={canChange}
                     team={this.props.team}
@@ -217,6 +234,9 @@ export default class InstalledOutgoingWebhooks extends React.PureComponent<Props
                 }
                 searchPlaceholder={localizeMessage('installed_outgoing_webhooks.search', 'Search Outgoing Webhooks')}
                 loading={this.state.loading}
+                nextPage={this.nextPage}
+                previousPage={this.previousPage}
+                page={this.state.page}
             >
                 {(filter: string) => {
                     const children = this.outgoingWebhooks(filter);

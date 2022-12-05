@@ -6,6 +6,7 @@ import {FormattedMessage} from 'react-intl';
 import {Link} from 'react-router-dom';
 
 import CopyText from 'components/copy_text';
+import Toggle from 'components/toggle';
 
 import {OutgoingWebhook} from '@mattermost/types/integrations';
 import {Team} from '@mattermost/types/teams';
@@ -53,6 +54,7 @@ type Props = {
     outgoingWebhook: OutgoingWebhook;
     onRegenToken: (outgoingWebhook: OutgoingWebhook) => void;
     onDelete: (outgoingWebhook: OutgoingWebhook) => void;
+    onToggle: (outgoingWebhook: OutgoingWebhook) => void;
     team: Team;
     creator: UserProfile;
     channel: Channel;
@@ -60,7 +62,18 @@ type Props = {
     filter?: string;
 }
 
-export default class InstalledOutgoingWebhook extends React.PureComponent<Props> {
+type State = {
+    hovering: boolean;
+}
+
+export default class InstalledOutgoingWebhook extends React.PureComponent<Props, State> {
+    public constructor(props: Props) {
+        super(props);
+        this.state = {
+            hovering: false,
+        };
+    }
+    
     handleRegenToken = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
 
@@ -69,6 +82,23 @@ export default class InstalledOutgoingWebhook extends React.PureComponent<Props>
 
     handleDelete = () => {
         this.props.onDelete(this.props.outgoingWebhook);
+    }
+
+    handleToggle = () => {
+        const outgoingWebhook = this.props.outgoingWebhook;
+        const toggledWebhook = {
+            ...outgoingWebhook,
+            enabled: !outgoingWebhook.enabled,
+        };
+        this.props.onToggle(toggledWebhook);
+    }
+
+    handleMouseOver = () => {
+        this.setState({hovering: true});
+    }
+
+    handleMouseOut = () =>{
+        this.setState({hovering: false});
     }
 
     makeDisplayName(outgoingWebhook: OutgoingWebhook, channel: Channel) {
@@ -97,6 +127,16 @@ export default class InstalledOutgoingWebhook extends React.PureComponent<Props>
         }
 
         const displayName = this.makeDisplayName(outgoingWebhook, channel);
+
+        let displayEnabled = null;
+        if (outgoingWebhook.enabled) {
+            displayEnabled = (
+                <FormattedMessage
+                    id='installed_outgoing_webhooks.disabled_webhook'
+                    defaultMessage=' (Disabled)'
+                />
+            );
+        }
 
         let description = null;
         if (outgoingWebhook.description) {
@@ -159,7 +199,7 @@ export default class InstalledOutgoingWebhook extends React.PureComponent<Props>
 
         let actions = null;
         if (this.props.canChange) {
-            actions = (
+            actions = (this.state.hovering ?
                 <div className='item-actions'>
                     <button
                         className='style--none color--link'
@@ -170,14 +210,9 @@ export default class InstalledOutgoingWebhook extends React.PureComponent<Props>
                             defaultMessage='Regen Token'
                         />
                     </button>
-                    {' - '}
                     <Link to={`/${this.props.team.name}/integrations/outgoing_webhooks/edit?id=${outgoingWebhook.id}`}>
-                        <FormattedMessage
-                            id='installed_integrations.edit'
-                            defaultMessage='Edit'
-                        />
+                        <i className='icon icon-pencil-outline'/>
                     </Link>
-                    {' - '}
                     <DeleteIntegrationLink
                         modalMessage={
                             <FormattedMessage
@@ -187,16 +222,32 @@ export default class InstalledOutgoingWebhook extends React.PureComponent<Props>
                         }
                         onDelete={this.handleDelete}
                     />
+                    <Toggle
+                        disabled={false}
+                        onToggle={this.handleToggle}
+                        toggled={this.props.outgoingWebhook.enabled}
+                        size={'btn-sm'}
+                    />
+                </div>
+            : 
+                <div className='item-actions'>
+                    <Toggle
+                        disabled={false}
+                        onToggle={this.handleToggle}
+                        toggled={this.props.outgoingWebhook.enabled}
+                        size={'btn-sm'}
+                    />
                 </div>
             );
         }
 
         return (
-            <div className='backstage-list__item'>
+            <div className='backstage-list__item' onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut}>
                 <div className='item-details'>
                     <div className='item-details__row d-flex flex-column flex-md-row justify-content-between'>
                         <strong className='item-details__name'>
                             {displayName}
+                            {displayEnabled}
                         </strong>
                         {actions}
                     </div>
